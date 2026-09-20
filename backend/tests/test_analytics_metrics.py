@@ -30,3 +30,7 @@ def test_dashboard_style_average_ignores_sites_without_readings():
     # Including missing sites as 0.0 would yield 46.6... instead of 70.0
     assert _average_biodiversity(scores) == 70.0
     assert _average_biodiversity([]) == 0.0
+
+
+def test_average_biodiversity_ignores_missing_sites():
+    assert average_biodiversity([80.0, 60.0]) == 70.0
