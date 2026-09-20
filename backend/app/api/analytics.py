@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime, timezone
 from app.db.session import get_db
 from app.models.site import Site
 from app.models.project import Project
@@ -108,6 +109,44 @@ def get_site_analytics(
     biodiversity_current = latest.biodiversity_score if latest else 0.0
     biodiversity_target = float(project.biodiversity_target or 0.0)
 
+    # Automated monitoring signals: transparent rule-based indicators, not a predictive model.
+    alerts: List[str] = []
+    insights: List[str] = []
+    risk_score = 0
+
+    if not records:
+        risk_score += 40
+        alerts.append("No performance data has been recorded for this site.")
+        insights.append("Add an initial performance record to establish a baseline.")
+    else:
+        if latest and (datetime.now(timezone.utc) - latest.recorded_at).days > 30:
+            risk_score += 25
+            alerts.append("Performance monitoring is more than 30 days old.")
+            insights.append("Schedule a fresh site measurement to keep monitoring current.")
+
+        if len(records) >= 2:
+            previous = records[-2]
+            if previous.biodiversity_score > 0:
+                biodiversity_change = ((latest.biodiversity_score - previous.biodiversity_score) / previous.biodiversity_score) * 100
+                if biodiversity_change <= -10:
+                    risk_score += 35
+                    alerts.append("Biodiversity score has declined by 10% or more since the previous reading.")
+                    insights.append("Review recent site conditions and increase monitoring frequency.")
+                elif biodiversity_change >= 10:
+                    insights.append("Biodiversity score has improved by 10% or more since the previous reading.")
+
+            if previous.carbon_value > 0:
+                carbon_change = ((latest.carbon_value - previous.carbon_value) / previous.carbon_value) * 100
+                if carbon_change <= -10:
+                    risk_score += 30
+                    alerts.append("Carbon metric has declined by 10% or more since the previous reading.")
+                    insights.append("Review the latest carbon measurement and investigate the change.")
+                elif carbon_change >= 10:
+                    insights.append("Carbon metric has improved by 10% or more since the previous reading.")
+
+    risk_score = min(risk_score, 100)
+    risk_level = "High" if risk_score >= 60 else "Medium" if risk_score >= 30 else "Low"
+
     historical = [
         HistoricalPerformancePoint(
             recorded_at=r.recorded_at,
@@ -132,6 +171,10 @@ def get_site_analytics(
             biodiversity_current, biodiversity_target
         ),
         historical_performance=historical,
+        risk_score=risk_score,
+        risk_level=risk_level,
+        alerts=alerts,
+        insights=insights,
     )
 
 
