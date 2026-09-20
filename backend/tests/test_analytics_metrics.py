@@ -1,10 +1,10 @@
 from types import SimpleNamespace
 
-from app.api.analytics import _average_biodiversity, _site_metric_snapshot
+from app.services.analytics_metrics import average_biodiversity, site_metric_snapshot
 
 
 def test_missing_performance_does_not_count_as_zero_biodiversity():
-    carbon, biodiversity = _site_metric_snapshot(None)
+    carbon, biodiversity = site_metric_snapshot(None)
 
     assert carbon == 0.0
     assert biodiversity is None
@@ -28,5 +28,5 @@ def test_dashboard_style_average_ignores_sites_without_readings():
     scores = [score for _, score in snapshots if score is not None]
 
     # Including missing sites as 0.0 would yield 46.6... instead of 70.0
-    assert _average_biodiversity(scores) == 70.0
+    assert average_biodiversity(scores) == 70.0
     assert _average_biodiversity([]) == 0.0
