@@ -9,10 +9,10 @@ from app.core.security import (
     create_access_token,
     get_password_hash,
 )
-from app.api.security import oauth2_scheme
 from app.db.session import get_db
 from app.models.user import User, UserRole
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, Token
+
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
@@ -68,7 +68,7 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-@router.post("/login")
+@router.post("/login", response_model=Token)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)

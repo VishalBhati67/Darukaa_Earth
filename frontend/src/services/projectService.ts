@@ -50,7 +50,7 @@ export const projectService = {
         currentCarbon += dp.analytics.carbon_total_current
 
         for (const site of dp.analytics.sites) {
-          if (site.biodiversity_score >= 0) {
+          if (site.has_performance && site.biodiversity_score != null) {
             latestBiodiversityScores.push(site.biodiversity_score)
           }
         }

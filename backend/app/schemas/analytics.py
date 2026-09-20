@@ -85,7 +85,8 @@ class ProjectSiteSummary(BaseModel):
     site_id: int
     site_name: str
     carbon_current: float
-    biodiversity_score: float
+    biodiversity_score: Optional[float] = None
+    has_performance: bool = False
 
 
 class ProjectAnalyticsResponse(BaseModel):

@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func as sa_func
-from datetime import datetime
 from typing import List, Optional
 from app.db.session import get_db
 from app.models.site import Site
@@ -19,6 +17,11 @@ from app.schemas.analytics import (
 from app.api.auth import get_current_user
 from app.api.deps import get_current_admin_user
 from app.models.user import User
+from app.services.analytics_metrics import (
+    average_biodiversity,
+    compute_progress,
+    site_metric_snapshot,
+)
 
 router = APIRouter(tags=["Analytics"])
 
@@ -65,13 +68,6 @@ def _earliest_performance_for_site(site_id: int, db: Session) -> Optional[Perfor
         .order_by(Performance.recorded_at.asc())
         .first()
     )
-
-
-def _compute_progress(current: float, target: float) -> float:
-    """Compute progress percentage, guarding against zero target."""
-    if target and target > 0:
-        return round((current / target) * 100, 2)
-    return 0.0
 
 
 # ============================================================================
@@ -129,10 +125,10 @@ def get_site_analytics(
         carbon_baseline=carbon_baseline,
         carbon_current=carbon_current,
         carbon_target=carbon_target,
-        carbon_progress_percent=_compute_progress(carbon_current, carbon_target),
+        carbon_progress_percent=compute_progress(carbon_current, carbon_target),
         biodiversity_score_current=biodiversity_current,
         biodiversity_target=biodiversity_target,
-        biodiversity_progress_percent=_compute_progress(
+        biodiversity_progress_percent=compute_progress(
             biodiversity_current, biodiversity_target
         ),
         historical_performance=historical,
@@ -264,11 +260,10 @@ def get_project_analytics(
 
     for site in sites:
         latest = _latest_performance_for_site(site.id, db)
-        carbon_current = latest.carbon_value if latest else 0.0
-        biodiversity_current = latest.biodiversity_score if latest else 0.0
+        carbon_current, biodiversity_current = site_metric_snapshot(latest)
 
         carbon_total_current += carbon_current
-        if latest is not None:
+        if biodiversity_current is not None:
             biodiversity_scores.append(biodiversity_current)
 
         site_summaries.append(
@@ -277,14 +272,11 @@ def get_project_analytics(
                 site_name=site.name,
                 carbon_current=carbon_current,
                 biodiversity_score=biodiversity_current,
+                has_performance=latest is not None,
             )
         )
 
-    biodiversity_avg_current = (
-        sum(biodiversity_scores) / len(biodiversity_scores)
-        if biodiversity_scores
-        else 0.0
-    )
+    biodiversity_avg_current = _average_biodiversity(biodiversity_scores)
 
     carbon_target = float(project.carbon_target or 0.0)
     biodiversity_target = float(project.biodiversity_target or 0.0)

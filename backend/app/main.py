@@ -27,3 +27,8 @@ app.include_router(analytics.router)
 @app.get("/")
 def root():
     return {"message": "Welcome to Darukaa.Earth API"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

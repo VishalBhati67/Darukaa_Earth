@@ -9,7 +9,11 @@ export const api = axios.create({
   },
 })
 
-// Request interceptor: Attach JWT to all requests
+const isAuthAttempt = (url?: string) => {
+  if (!url) return false
+  return url.includes('/auth/login') || url.includes('/auth/register')
+}
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('darukaa_token')
   if (token) {
@@ -18,14 +22,19 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Response interceptor: Handle 401 Unauthorized globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+    const requestUrl = String(error.config?.url ?? '')
+
+    // Failed login/register must stay on the form so the error message can show.
+    if (status === 401 && !isAuthAttempt(requestUrl)) {
       localStorage.removeItem('darukaa_token')
       localStorage.removeItem('darukaa_user')
-      window.location.href = '/login'
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   },

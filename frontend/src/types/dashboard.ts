@@ -1,5 +1,5 @@
 export type ProjectType = 'carbon' | 'biodiversity' | 'carbon_biodiversity'
-export type ProjectStatus = 'planning' | 'active' | 'completed'
+export type ProjectStatus = 'planning' | 'active' | 'completed' | 'archived'
 
 export interface Project {
   id: number
@@ -44,7 +44,8 @@ export interface SiteSummary {
   site_id: number
   site_name: string
   carbon_current: number
-  biodiversity_score: number
+  biodiversity_score: number | null
+  has_performance?: boolean
 }
 
 export interface ProjectAnalytics {

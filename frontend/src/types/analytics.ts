@@ -4,6 +4,23 @@ export interface HistoricalPerformancePoint {
   biodiversity_score: number
 }
 
+export interface PerformanceRecord {
+  id: number
+  site_id: number
+  recorded_at: string
+  carbon_value: number
+  biodiversity_score: number
+  notes: string | null
+  created_at: string
+}
+
+export interface PerformanceCreate {
+  recorded_at: string
+  carbon_value: number
+  biodiversity_score: number
+  notes?: string | null
+}
+
 export interface SiteAnalytics {
   site_id: number
   site_name: string
