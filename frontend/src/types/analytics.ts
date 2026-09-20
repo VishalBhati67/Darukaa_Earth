@@ -34,4 +34,8 @@ export interface SiteAnalytics {
   biodiversity_target: number
   biodiversity_progress_percent: number
   historical_performance: HistoricalPerformancePoint[]
+  risk_score: number
+  risk_level: string
+  alerts: string[]
+  insights: string[]
 }
