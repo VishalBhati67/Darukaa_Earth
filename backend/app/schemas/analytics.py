@@ -75,6 +75,12 @@ class SiteAnalyticsResponse(BaseModel):
 
     historical_performance: List[HistoricalPerformancePoint]
 
+    # Automated monitoring signals derived from persisted performance data.
+    risk_score: int = Field(..., ge=0, le=100)
+    risk_level: str
+    alerts: List[str]
+    insights: List[str]
+
 
 # ============================================================================
 # Project analytics
