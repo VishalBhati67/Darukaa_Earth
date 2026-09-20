@@ -276,7 +276,7 @@ def get_project_analytics(
             )
         )
 
-    biodiversity_avg_current = _average_biodiversity(biodiversity_scores)
+    biodiversity_avg_current = average_biodiversity(biodiversity_scores)
 
     carbon_target = float(project.carbon_target or 0.0)
     biodiversity_target = float(project.biodiversity_target or 0.0)
@@ -288,10 +288,10 @@ def get_project_analytics(
         total_area_hectares=total_area_hectares,
         carbon_total_current=carbon_total_current,
         carbon_target=carbon_target,
-        carbon_progress_percent=_compute_progress(carbon_total_current, carbon_target),
+        carbon_progress_percent=compute_progress(carbon_total_current, carbon_target),
         biodiversity_avg_current=biodiversity_avg_current,
         biodiversity_target=biodiversity_target,
-        biodiversity_progress_percent=_compute_progress(
+        biodiversity_progress_percent=compute_progress(
             biodiversity_avg_current, biodiversity_target
         ),
         sites=site_summaries,
