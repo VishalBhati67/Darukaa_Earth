@@ -21,6 +21,8 @@ import {
   BarChart2,
   MapPin,
   RefreshCw,
+  ShieldAlert,
+  Lightbulb,
 } from 'lucide-react'
 import { analyticsService } from '../services/analyticsService'
 import type { SiteAnalytics as SiteAnalyticsData } from '../types/analytics'
@@ -270,6 +272,56 @@ export const SiteAnalytics: React.FC = () => {
           <p className="mt-1 text-sm text-gray-500">
             Progress: {data.biodiversity_progress_percent.toFixed(1)}%
           </p>
+        </div>
+      </div>
+
+      {/* Environmental Intelligence */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Environmental Risk</h3>
+            </div>
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-700">
+              {data.risk_level} · {data.risk_score}/100
+            </span>
+          </div>
+          <div className="h-3 overflow-hidden rounded-full bg-gray-100">
+            <div
+              className="h-full rounded-full bg-amber-500 transition-all"
+              style={{ width: `${Math.min(data.risk_score, 100)}%` }}
+            />
+          </div>
+          {data.alerts.length > 0 ? (
+            <ul className="mt-4 space-y-2">
+              {data.alerts.map((alert, index) => (
+                <li key={index} className="rounded-md bg-amber-50 p-3 text-sm text-amber-900">
+                  {alert}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-4 text-sm text-gray-500">No current monitoring alerts.</p>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-blue-600" />
+            <h3 className="text-lg font-semibold text-gray-900">Environmental Insights</h3>
+          </div>
+          {data.insights.length > 0 ? (
+            <ul className="space-y-3">
+              {data.insights.map((insight, index) => (
+                <li key={index} className="rounded-md bg-blue-50 p-3 text-sm text-blue-900">
+                  {insight}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500">More performance data is needed for insights.</p>
+          )}
         </div>
       </div>
 
